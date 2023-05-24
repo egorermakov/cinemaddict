@@ -1,5 +1,8 @@
 const FILM_COUNT = 5;
 
+const EMOTIONS = ['smile', 'sleeping', 'puke', 'angry'];
+
 export {
-  FILM_COUNT
+  FILM_COUNT,
+  EMOTIONS
 };
