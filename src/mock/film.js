@@ -21,11 +21,12 @@ const generateFilm = () => ({
   totalRating: getRandomInteger(Rating.MIN, Rating.MAX),
   poster: getRandomValue(posters),
   ageRating: getRandomInteger(AgeRating.MIN, AgeRating.MAX),
+  director: `${getRandomValue(names)} ${getRandomValue(surnames)}`,
   writers: Array.from({length: NAME_COUNT}, () => `${getRandomValue(names)} ${getRandomValue(surnames)}`),
   actors: Array.from({length: NAME_COUNT}, () => `${getRandomValue(names)} ${getRandomValue(surnames)}`),
   release: {
     date: getDate(),
-    releaseCountry: getRandomValue(countries)
+    releaseСountry: getRandomValue(countries)
   },
   runtime: getRandomInteger(Runtime.MIN, Runtime.MAX),
   genre:  Array.from({length: getRandomInteger(GenreCount.MIN, GenreCount.MAX)}, () => getRandomValue(genres)),
