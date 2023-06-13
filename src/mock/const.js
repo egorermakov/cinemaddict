@@ -32,6 +32,11 @@ const DaysDuration = {
   MAX: 7
 };
 
+const DateType = {
+  FILM_INFO: 'FILM_INFO',
+  USER_DETAILS: 'USER_DETAILS'
+};
+
 const names = [
   'Alice',
   'Ivan',
@@ -110,6 +115,7 @@ export {
   Runtime,
   YearsDuration,
   DaysDuration,
+  DateType,
   names,
   surnames,
   titles,
