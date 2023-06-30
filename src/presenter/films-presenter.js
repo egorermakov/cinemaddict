@@ -8,12 +8,13 @@ import FilmButtonMoreView from '../view/film-button-more-view.js';
 import FilmPresenter from '../presenter/film-presenter.js';
 import FilmDetailsPresenter from './film-details-presenter.js';
 
-import {render} from '../framework/render.js';
+import {render, remove, replace} from '../framework/render.js';
 import {updateItem} from '../utils/common.js';
-import {FILM_COUNT_PER_STEP} from '../const.js';
+import {sortFilmsByDate, sortFilmsByRating} from '../utils/film.js';
+import {FILM_COUNT_PER_STEP, SortType} from '../const.js';
 
 export default class FilmsPresenter {
-  #sortComponent = new SortView();
+  #sortComponent = null;
   #filmsComponent = new FilmsView();
   #filmListComponent = new FilmListView();
   #filmListContainerComponent = new FilmListContainerView();
@@ -24,8 +25,10 @@ export default class FilmsPresenter {
   #commentsModel = null;
 
   #films = [];
+  #sourcedFilms = [];
 
   #selectedFilm = null;
+  #currentSortType = SortType.DEFAULT;
 
   #filmPresenter = new Map();
   #filmDetailsPresenter = null;
@@ -40,13 +43,18 @@ export default class FilmsPresenter {
 
   init = () => {
     this.#films = [...this.#filmsModel.get()];
+    this.#sourcedFilms = [...this.#filmsModel.get()];
 
     this.#renderFilmBoard();
   };
 
   #filmChangeHandler = (updatedFilm) => {
     this.#films = updateItem(this.#films, updatedFilm);
-    this.#filmPresenter.get(updatedFilm.id).init(updatedFilm);
+    this.#sourcedFilms = updateItem(this.#sourcedFilms, updatedFilm);
+
+    if (this.#filmPresenter.get(updatedFilm.id)) {
+      this.#filmPresenter.get(updatedFilm.id).init(updatedFilm);
+    }
 
     if (this.#filmDetailsPresenter && this.#selectedFilm.id === updatedFilm.id) {
       this.#selectedFilm = updatedFilm;
@@ -61,8 +69,43 @@ export default class FilmsPresenter {
     );
   }
 
+  #sortFilms = (sortType) => {
+    switch (sortType) {
+      case SortType.DATE:
+        this.#films.sort(sortFilmsByDate);
+        break;
+      case SortType.RATING:
+        this.#films.sort(sortFilmsByRating);
+        break;
+      default:
+        this.#films = [...this.#sourcedFilms];
+    }
+
+    this.#currentSortType = sortType;
+  };
+
+  #sortTypeChangeHandler = (sortType) => {
+    if (this.#currentSortType === sortType) {
+      return;
+    }
+
+    this.#sortFilms(sortType);
+    this.#clearFilmList();
+    this.#renderSort(this.#container);
+    this.#renderFilmList();
+  };
+
   #renderSort(container) {
-    render(this.#sortComponent, container);
+    if (!this.#sortComponent) {
+      this.#sortComponent = new SortView(this.#currentSortType);
+      render(this.#sortComponent, container);
+    } else {
+      const updatedSortComponent = new SortView(this.#currentSortType);
+      replace(updatedSortComponent, this.#sortComponent);
+      this.#sortComponent = updatedSortComponent;
+    }
+
+    this.#sortComponent.setSortTypeChangeHandler(this.#sortTypeChangeHandler);
   }
 
   #renderFilmListContainer(container) {
@@ -82,6 +125,13 @@ export default class FilmsPresenter {
       this.#renderFilmButtonMore(this.#filmListComponent.element);
     }
   }
+
+  #clearFilmList = () => {
+    this.#filmPresenter.forEach((presenter) => presenter.destroy());
+    this.#filmPresenter.clear();
+    this.#renderedFilmCount = FILM_COUNT_PER_STEP;
+    remove(this.#filmButtonMoreComponent);
+  };
 
   #renderFilms(from, to, container) {
     this.#films
