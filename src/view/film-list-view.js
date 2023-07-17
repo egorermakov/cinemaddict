@@ -1,4 +1,4 @@
-import AbsctractView from '../framework/view/abstract-view.js';
+import AbstractView from '../framework/view/abstract-view.js';
 
 const createFilmListViewTemplate = () =>
   `
@@ -7,7 +7,7 @@ const createFilmListViewTemplate = () =>
     </div>
   `;
 
-export default class FilmListView extends AbsctractView {
+export default class FilmListView extends AbstractView {
   get template() {
     return createFilmListViewTemplate();
   }

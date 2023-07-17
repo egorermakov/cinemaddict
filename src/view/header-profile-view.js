@@ -1,4 +1,4 @@
-import AbsctractView from '../framework/view/abstract-view.js';
+import AbstractView from '../framework/view/abstract-view.js';
 
 const createHeaderProfileTemplate = (userStatus) =>
   `
@@ -14,7 +14,7 @@ const createHeaderProfileTemplate = (userStatus) =>
     </section>
   `;
 
-export default class HeaderProfileView extends AbsctractView {
+export default class HeaderProfileView extends AbstractView {
   #userStatus = null;
 
   constructor(userStatus) {

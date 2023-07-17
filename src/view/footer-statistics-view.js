@@ -1,8 +1,8 @@
-import AbsctractView from '../framework/view/abstract-view.js';
+import AbstractView from '../framework/view/abstract-view.js';
 
-const createFooterStatisticsTemplate = (count  = 0) => `<p>${count} movies inside</p>`;
+const createFooterStatisticsTemplate = (count = 0) => `<p>${count} movies inside</p>`;
 
-export default class View extends AbsctractView {
+export default class FooterStatisticsView extends AbstractView{
   #count = null;
 
   constructor(count) {
