@@ -49,6 +49,15 @@ export default class FilmPresenter {
     remove(this.#filmCardComponent);
   };
 
+  setFilmEditing = () => {
+    this.#filmCardComponent.updateElement({isFilmEditing: true});
+  };
+
+  setAborting = () => {
+    this.#filmCardComponent.updateElement({isFilmEditing: false});
+    this.#filmCardComponent.shakeControls();
+  };
+
   #watchlistBtnClickHandler = () => {
     this.#changeData(
       UserAction.UPDATE_FILM,

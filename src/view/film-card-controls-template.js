@@ -1,6 +1,6 @@
-export const createFilmCardControlsTemplate = ({watchlist, alreadyWatched, favorite}) =>
+export const createFilmCardControlsTemplate = ({watchlist, alreadyWatched, favorite}, isFilmEditing) =>
   `
-    <div class="film-card__controls">
+    <div class="film-card__controls" style="position: absolute">
       <button
         class="
           film-card__controls-item
@@ -8,6 +8,7 @@ export const createFilmCardControlsTemplate = ({watchlist, alreadyWatched, favor
           ${(watchlist) ? 'film-card__controls-item--active' : ''}
         "
         type="button"
+        ${(isFilmEditing) ? 'disabled' : ''}
       >
         Add to watchlist
       </button>
@@ -18,6 +19,7 @@ export const createFilmCardControlsTemplate = ({watchlist, alreadyWatched, favor
           ${(alreadyWatched) ? 'film-card__controls-item--active' : ''}
         "
         type="button"
+        ${(isFilmEditing) ? 'disabled' : ''}
       >
         Mark as watched
       </button>
@@ -28,6 +30,7 @@ export const createFilmCardControlsTemplate = ({watchlist, alreadyWatched, favor
           ${(favorite) ? 'film-card__controls-item--active' : ''}
         "
         type="button"
+        ${(isFilmEditing) ? 'disabled' : ''}
       >
         Mark as favorite
       </button>

@@ -4,7 +4,11 @@ import {createFilmDetailsCommentsTemplate} from './film-details-comments-templat
 import {createFilmDetailsFormTemplate} from './film-details-form-template.js';
 import {createFilmDetailsControlsTemplate} from './film-details-controls-template.js';
 
-const createFilmDetailsTemplate = ({filmInfo, userDetails, comments, checkedEmotion, comment}) =>
+const createFilmDetailsTemplate = ({
+  filmInfo, userDetails, comments, checkedEmotion,
+  comment, isCommentLoadingError, isDisabled,
+  deleteCommentId
+}) =>
   `
     <section class="film-details">
       <div class="film-details__inner">
@@ -22,12 +26,12 @@ const createFilmDetailsTemplate = ({filmInfo, userDetails, comments, checkedEmot
         <div class="film-details__bottom-container">
           <section class="film-details__comments-wrap">
             <h3 class="film-details__comments-title">
-              Comments <span class="film-details__comments-count">${comments.length}</span>
+              ${((!isCommentLoadingError) ? `Comments <span class="film-details__comments-count">${comments.length}</span>` : 'Error loading comments')}
             </h3>
 
-            ${createFilmDetailsCommentsTemplate(comments)}
+            ${(!isCommentLoadingError) ? createFilmDetailsCommentsTemplate(comments, deleteCommentId) : ''}
 
-            ${createFilmDetailsFormTemplate(checkedEmotion, comment)}
+            ${createFilmDetailsFormTemplate(checkedEmotion, comment, isCommentLoadingError, isDisabled)}
 
           </section>
         </div>
@@ -36,31 +40,53 @@ const createFilmDetailsTemplate = ({filmInfo, userDetails, comments, checkedEmot
  `;
 
 export default class FilmDetailsView extends AbsctractStatefulView {
-  constructor(film, comments, viewData, updateViewData) {
+  constructor(film, comments, viewData, updateViewData, isCommentLoadingError) {
     super();
     this._state = FilmDetailsView.parseFilmToState(
       film,
       comments,
       viewData.emotion,
       viewData.comment,
-      viewData.scrollPosition
+      viewData.scrollPosition,
+      isCommentLoadingError
     );
     this.updateViewData = updateViewData;
-    this.#setInnerHandlers();
+
+    if (!isCommentLoadingError) {
+      this.#setInnerHandlers();
+    }
   }
 
   get template() {
     return createFilmDetailsTemplate(this._state);
   }
 
+  shakeComment = (commentId) => {
+    const commentElement = this.element.querySelector(`li[data-comment-id='${commentId}']`);
+    this.shake.call({element: commentElement});
+  };
+
+  shakeForm = () => {
+    const formElement = this.element.querySelector('.film-details__new-comment');
+    this.shake.call({element: formElement});
+  };
+
+  shakeControls = () => {
+    const controlsElement = this.element.querySelector('.film-details__controls');
+    this.shake.call({element: controlsElement});
+  };
+
   _restoreHandlers = () => {
     this.setScrollPosition();
-    this.#setInnerHandlers();
     this.setCloseBtnClickHandler(this._callback.closeBtnClick);
     this.setWatchlistBtnClickHandler(this._callback.watchlistBtnClick);
     this.setWatchedBtnClickHandler(this._callback.watchedBtnClick);
     this.setFavoriteBtnClickHandler(this._callback.favoriteBtnClick);
-    this.setCommentDeleteClickHandler(this._callback.commentDeleteClick);
+
+    if (!this._state.isCommentLoadingError && !this._state.isDisabled) {
+      this.#setInnerHandlers();
+      this.setCommentDeleteClickHandler(this._callback.commentDeleteClick);
+    }
   };
 
   setCommentData = () => {
@@ -73,7 +99,9 @@ export default class FilmDetailsView extends AbsctractStatefulView {
 
   setCloseBtnClickHandler(callback) {
     this._callback.closeBtnClick = callback;
-    this.element.querySelector('.film-details__close-btn').addEventListener('click', this.#closeBtnClickHandler);
+    this.element
+      .querySelector('.film-details__close-btn')
+      .addEventListener('click', this.#closeBtnClickHandler);
   }
 
   setWatchlistBtnClickHandler(callback) {
@@ -104,7 +132,7 @@ export default class FilmDetailsView extends AbsctractStatefulView {
       this._callback.commentDeleteClick = callback;
       commentDeleteElements.forEach(
         (element) =>
-          element.addEventListener('click', this.#commentDeleteClickHandler)
+          element.addEventListener('click', this.#commentDeleteClickHandler, true)
       );
     }
   }
@@ -175,12 +203,17 @@ export default class FilmDetailsView extends AbsctractStatefulView {
     comments,
     checkedEmotion = null,
     comment = null,
-    scrollPosition = 0
+    scrollPosition = 0,
+    isCommentLoadingError = false
   ) => ({
     ...film,
     comments,
+    isCommentLoadingError,
     checkedEmotion,
     comment,
-    scrollPosition
+    scrollPosition,
+    isDisabled: false,
+    deleteCommentId: null,
+    isFilmEditing: false
   });
 }
